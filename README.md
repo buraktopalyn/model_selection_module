@@ -1,4 +1,4 @@
-# Model Selection Module
+# Farklı Senaryolar İçin Model Seçme Modülü
 
 Bu modül, farklı veri setleri için en iyi makine öğrenmesi algoritmasını seçen profesyonel bir araçtır. Regresyon, sınıflandırma ve kümeleme problemleri için kullanılabilir.
 
