@@ -3,8 +3,8 @@
 Model Seçme Modülü
 
 Bu modül, en popüler makine öğrenmesi algoritmalarını içerir ve en iyi modeli seçmeye yardımcı olur.
-- 10 regresyon algoritması
-- 10 sınıflandırma algoritması
+- 14 regresyon algoritması
+- 14 sınıflandırma algoritması
 - 5 kümeleme algoritması
 - Ensemble modeller (bagging, stacking, boosting)
 """
