@@ -43,14 +43,24 @@ from sklearn.cluster import KMeans, AgglomerativeClustering, DBSCAN, SpectralClu
 from sklearn.ensemble import StackingRegressor, StackingClassifier, VotingRegressor, VotingClassifier
 
 class ModelSelector:
-    def __init__(self, problem_type='regression'):
+    def __init__(self, problem_type: str = 'regression') -> None:
         """
-        Model seçici sınıfı.
-        
-        Parameters:
-        -----------
-        problem_type : str, default='regression'
-            Problem tipi: 'regression', 'classification' veya 'clustering'
+        Model seçici sınıfını başlatır.
+
+        Args:
+            problem_type (str, optional): Problem tipi ('regression', 'classification', 'clustering').
+                Varsayılan: 'regression'.
+
+        Attributes:
+            models (dict): Eğitilecek modellerin sözlüğü
+            results (dict): Model sonuçlarını saklamak için sözlük
+            best_model (Any): En iyi performans gösteren model
+            best_model_name (str | None): En iyi modelin adı
+            best_params (dict | None): En iyi model parametreleri
+            best_score (float): En iyi skor değeri
+
+        Raises:
+            ValueError: Geçersiz problem tipi verildiğinde
         """
         self.problem_type = problem_type
         self.models = {}
@@ -112,18 +122,17 @@ class ModelSelector:
                 'Birch': Birch()
             }
     
-    def add_ensemble_model(self, ensemble_type, base_models=None, weights=None):
+    def add_ensemble_model(self, ensemble_type: str, base_models: list | None = None, weights: list[float] | None = None) -> None:
         """
-        Ensemble model ekler.
-        
-        Parameters:
-        -----------
-        ensemble_type : str
-            Ensemble model tipi: 'stacking', 'voting', 'bagging', 'boosting'
-        base_models : list, optional
-            Temel modeller listesi
-        weights : list, optional
-            Voting için ağırlıklar
+        Ensemble model ekler ve modeller sözlüğüne kaydeder.
+
+        Args:
+            ensemble_type (str): Ensemble tipi ('stacking', 'voting', 'bagging', 'boosting')
+            base_models (list | None, optional): Temel modeller listesi. Varsayılan: İlk 3 model.
+            weights (list[float] | None, optional): Voting modelleri için ağırlık listesi.
+
+        Raises:
+            ValueError: Geçersiz ensemble tipi veya model uyumsuzluğu durumunda
         """
         if base_models is None:
             # Varsayılan olarak mevcut modellerin ilk 3'ünü kullan
@@ -156,20 +165,18 @@ class ModelSelector:
                 )
             # Bagging ve Boosting zaten yüklendi
     
-    def fit(self, X, y, test_size=0.2, random_state=42):
+    def fit(self, X: pd.DataFrame, y: pd.Series | None, test_size: float = 0.2, random_state: int = 42) -> None:
         """
-        Tüm modelleri eğitir ve değerlendirir.
-        
-        Parameters:
-        -----------
-        X : array-like
-            Özellikler
-        y : array-like
-            Hedef değişken
-        test_size : float, default=0.2
-            Test seti boyutu
-        random_state : int, default=42
-            Rastgele durum
+        Tüm modelleri eğitir ve performanslarını değerlendirir.
+
+        Args:
+            X (pd.DataFrame): Eğitim veri seti özellikleri
+            y (pd.Series | None): Hedef değişken serisi (kümeleme için None)
+            test_size (float, optional): Test seti için ayrılacak oran. Varsayılan: 0.2.
+            random_state (int, optional): Rastgelelik için seed değeri. Varsayılan: 42.
+
+        Raises:
+            ValueError: Hedef değişken eksik olduğunda veya problem tipiyle uyumsuzluk durumunda
         """
         # Kümeleme için y kullanılmaz
         if self.problem_type != 'clustering':

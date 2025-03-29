@@ -34,14 +34,22 @@ sns.set(style="whitegrid")
 warnings.filterwarnings('ignore')
 
 class DataPreprocessor:
-    def __init__(self, verbose=True):
+    def __init__(self, verbose: bool = True) -> None:
         """
-        Veri ön işleme sınıfı.
-        
-        Parameters:
-        -----------
-        verbose : bool, default=True
-            İşlem detaylarını gösterme durumu
+        Veri ön işleme sınıfını başlatır.
+
+        Args:
+            verbose (bool, optional): İşlem detaylarını gösterme durumu. Varsayılan: True.
+
+        Attributes:
+            transformers (dict): Ölçeklendiricileri saklamak için sözlük
+            encoders (dict): Kodlayıcıları saklamak için sözlük
+            imputers (dict): Eksik veri doldurucuları saklamak için sözlük
+            feature_selectors (dict): Özellik seçicileri saklamak için sözlük
+            outlier_indices (dict): Aykırı değer indekslerini saklamak için sözlük
+            dropped_columns (list): Düşürülen sütunların listesi
+            original_data (pd.DataFrame): Orijinal veri seti
+            processed_data (pd.DataFrame): İşlenmiş veri seti
         """
         self.verbose = verbose
         self.transformers = {}
@@ -53,23 +61,21 @@ class DataPreprocessor:
         self.original_data = None
         self.processed_data = None
         
-    def fit_transform(self, data, target=None, preprocessing_steps=None):
+    def fit_transform(self, data: pd.DataFrame, target: str | None = None, preprocessing_steps: dict | None = None) -> pd.DataFrame:
         """
         Veriyi işler ve dönüştürür.
-        
-        Parameters:
-        -----------
-        data : pandas.DataFrame
-            İşlenecek veri
-        target : str, optional
-            Hedef değişken adı
-        preprocessing_steps : dict, optional
-            Uygulanacak ön işleme adımları ve parametreleri
-            
+
+        Args:
+            data (pd.DataFrame): İşlenecek ham veri seti
+            target (str | None, optional): Hedef değişken adı. Varsayılan: None.
+            preprocessing_steps (dict | None, optional): Uygulanacak ön işleme adımlarını içeren sözlük.
+                Format: {'adım_adi': {parametreler}}. Varsayılan: None.
+
         Returns:
-        --------
-        pandas.DataFrame
-            İşlenmiş veri
+            pd.DataFrame: İşlenmiş veri seti
+
+        Raises:
+            ValueError: Geçersiz ön işleme adımı verildiğinde
         """
         self.original_data = data.copy()
         self.processed_data = data.copy()
