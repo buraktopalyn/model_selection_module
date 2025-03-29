@@ -1,8 +1,10 @@
 # Model Seçme Modülü
 
-Bu modül, makine öğrenmesi modellerini otomatik olarak değerlendiren ve en iyi performans gösteren modeli seçen bir araçtır. Regresyon, sınıflandırma ve kümeleme problemleri için çeşitli algoritmaları içerir.
+Bu modül, makine öğrenmesi modellerini otomatik olarak değerlendiren ve en iyi performans gösteren modeli seçen bir araçtır. Regresyon, sınıflandırma ve kümeleme problemleri için çeşitli algoritmaları içerir. Ayrıca, veri ön işleme ve keşifsel veri analizi (EDA) için kapsamlı fonksiyonlar sunar.
 
 ## Özellikler
+
+### Model Seçici (ModelSelector)
 
 - **Çoklu Problem Tipi Desteği**: Regresyon, sınıflandırma ve kümeleme problemleri için kullanılabilir
 - **Geniş Model Yelpazesi**: 
@@ -12,6 +14,15 @@ Bu modül, makine öğrenmesi modellerini otomatik olarak değerlendiren ve en i
 - **Ensemble Modeller**: Bagging, stacking, boosting ve voting yöntemleri
 - **Otomatik Model Değerlendirme**: Tüm modelleri eğitir ve performanslarını karşılaştırır
 - **En İyi Model Seçimi**: Performans metriklerine göre en iyi modeli otomatik olarak seçer
+
+### Veri Ön İşleme (DataPreprocessor)
+
+- **Eksik Değer İşleme**: Ortalama, medyan, mod, sabit değer, KNN ve satır silme yöntemleri
+- **Aykırı Değer Tespiti ve İşleme**: Z-skor, IQR, izolasyon ormanı yöntemleri
+- **Özellik Ölçeklendirme**: Standart, MinMax, Robust ve Power dönüşümleri
+- **Kategorik Değişken Kodlama**: One-hot, Label ve Ordinal kodlama
+- **Özellik Seçimi**: K-en iyi, önem tabanlı, RFE ve PCA yöntemleri
+- **Keşifsel Veri Analizi (EDA)**: Görselleştirme araçları ve istatistiksel analizler
 
 ## Kurulum
 
@@ -88,6 +99,38 @@ ms.fit(X, None)
 ms.display_results()
 ```
 
+### Veri Ön İşleme Örneği
+
+```python
+from data_preprocessor import DataPreprocessor
+import pandas as pd
+
+# Veri oluştur
+data = pd.DataFrame({
+    'A': [1, 2, None, 4, 5],
+    'B': [10, 20, 30, None, 50],
+    'C': ['x', 'y', 'z', 'x', 'y']
+})
+
+# Ön işleme adımlarını tanımla
+preprocessing_steps = {
+    'handle_missing_values': {'method': 'mean'},
+    'encode_categorical': {'method': 'one_hot'},
+    'scale_features': {'method': 'standard'}
+}
+
+# Veri ön işleyici oluştur
+preprocessor = DataPreprocessor(verbose=True)
+
+# Veriyi işle
+processed_data = preprocessor.fit_transform(
+    data=data,
+    preprocessing_steps=preprocessing_steps
+)
+
+print(processed_data.head())
+```
+
 ### Ensemble Model Ekleme
 
 ```python
@@ -109,6 +152,26 @@ ms.add_ensemble_model('stacking', base_models=base_models)
 
 # Modelleri eğit ve değerlendir
 ms.fit(X, y)
+```
+
+### Tam Örnek Kullanım
+
+Daha kapsamlı bir örnek için `example_usage.py` dosyasına bakabilirsiniz. Bu dosya, veri ön işleme ve model seçme modüllerinin birlikte nasıl kullanılacağını gösterir.
+
+## Test Dosyaları
+
+Proje, farklı problem tipleri için test dosyaları içerir:
+
+- **test_regression.py**: Regresyon modelleri için test dosyası (California Housing veri seti)
+- **test_classification.py**: Sınıflandırma modelleri için test dosyası (Iris veri seti)
+- **test_clustering.py**: Kümeleme modelleri için test dosyası (yapay veri seti)
+
+Test dosyalarını çalıştırmak için:
+
+```bash
+python test_regression.py
+python test_classification.py
+python test_clustering.py
 ```
 
 ## Desteklenen Modeller
