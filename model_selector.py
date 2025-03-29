@@ -79,38 +79,38 @@ class ModelSelector:
         """
         if self.problem_type == 'regression':
             self.models = {
-                'Linear Regression': LinearRegression(),
+                'Linear Regression': LinearRegression(n_jobs=-1),
                 'Ridge': Ridge(),
                 'Lasso': Lasso(),
                 'ElasticNet': ElasticNet(),
                 'Decision Tree': DecisionTreeRegressor(),
-                'Random Forest': RandomForestRegressor(),
-                'Gradient Boosting': GradientBoostingRegressor(),
+                'Random Forest': RandomForestRegressor(n_jobs=-1),
+                'Gradient Boosting': GradientBoostingRegressor(n_jobs=-1),
                 'SVR': SVR(),
-                'KNN': KNeighborsRegressor(),
-                'AdaBoost': AdaBoostRegressor(),
-                'Bagging': BaggingRegressor(),
-                'XGBoost': xgb.XGBRegressor(),
-                'LightGBM': lgbm.LGBMRegressor(),
-                'CatBoost': cb.CatBoostRegressor(verbose=0)
+                'KNN': KNeighborsRegressor(n_jobs=-1),
+                'AdaBoost': AdaBoostRegressor(n_jobs=-1),
+                'Bagging': BaggingRegressor(n_jobs=-1),
+                'XGBoost': xgb.XGBRegressor(n_jobs=-1),
+                'LightGBM': lgbm.LGBMRegressor(n_jobs=-1),
+                'CatBoost': cb.CatBoostRegressor(verbose=0, thread_count=-1)
             }
         
         elif self.problem_type == 'classification':
             self.models = {
-                'Logistic Regression': LogisticRegression(max_iter=1000),
+                'Logistic Regression': LogisticRegression(max_iter=1000, n_jobs=-1),
                 'Decision Tree': DecisionTreeClassifier(),
-                'Random Forest': RandomForestClassifier(),
-                'Gradient Boosting': GradientBoostingClassifier(),
+                'Random Forest': RandomForestClassifier(n_jobs=-1),
+                'Gradient Boosting': GradientBoostingClassifier(n_jobs=-1),
                 'SVC': SVC(probability=True),
-                'KNN': KNeighborsClassifier(),
+                'KNN': KNeighborsClassifier(n_jobs=-1),
                 'Naive Bayes': GaussianNB(),
                 'LDA': LinearDiscriminantAnalysis(),
                 'QDA': QuadraticDiscriminantAnalysis(),
-                'AdaBoost': AdaBoostClassifier(),
-                'Bagging': BaggingClassifier(),
-                'XGBoost': xgb.XGBClassifier(),
-                'LightGBM': lgbm.LGBMClassifier(),
-                'CatBoost': cb.CatBoostClassifier(verbose=0)
+                'AdaBoost': AdaBoostClassifier(n_jobs=-1),
+                'Bagging': BaggingClassifier(n_jobs=-1),
+                'XGBoost': xgb.XGBClassifier(n_jobs=-1),
+                'LightGBM': lgbm.LGBMClassifier(n_jobs=-1),
+                'CatBoost': cb.CatBoostClassifier(verbose=0, thread_count=-1)
             }
         
         elif self.problem_type == 'clustering':
