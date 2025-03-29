@@ -135,7 +135,7 @@ class ModelSelector:
             ValueError: Geçersiz ensemble tipi veya model uyumsuzluğu durumunda
         """
         if base_models is None:
-            # Varsayılan olarak mevcut modellerin ilk 3'ünü kullan
+            # Use first 3 of existing models by default
             base_models = list(self.models.values())[:3]
         
         if self.problem_type == 'regression':
@@ -149,7 +149,7 @@ class ModelSelector:
                     estimators=[(f'model{i}', model) for i, model in enumerate(base_models)],
                     weights=weights
                 )
-            # Bagging ve Boosting zaten yüklendi
+            # Bagging and Boosting are already loaded
         
         elif self.problem_type == 'classification':
             if ensemble_type == 'stacking':
@@ -163,9 +163,9 @@ class ModelSelector:
                     weights=weights,
                     voting='soft'
                 )
-            # Bagging ve Boosting zaten yüklendi
+            # Bagging and Boosting are already loaded
     
-    def fit(self, X: pd.DataFrame, y: pd.Series | None, test_size: float = 0.2, random_state: int = 42) -> None:
+    def fit(self, X: pd.DataFrame, y: pd.Series | None) -> None:
         """
         Tüm modelleri eğitir ve performanslarını değerlendirir.
 
@@ -178,11 +178,11 @@ class ModelSelector:
         Raises:
             ValueError: Hedef değişken eksik olduğunda veya problem tipiyle uyumsuzluk durumunda
         """
-        # Kümeleme için y kullanılmaz
+        # y is not used for clustering
         if self.problem_type != 'clustering':
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=self.test_size, random_state=self.random_state)
         else:
-            X_train, X_test = train_test_split(X, test_size=test_size, random_state=random_state)
+            X_train, X_test = train_test_split(X, test_size=self.test_size, random_state=self.random_state)
             y_train = y_test = None
         
         for name, model in self.models.items():
@@ -205,7 +205,7 @@ class ModelSelector:
                             'train_time': train_time
                         }
                         
-                        # En iyi modeli güncelle (R2'ye göre)
+                        # Update best model (based on R2)
                         if r2 > self.best_score:
                             self.best_score = r2
                             self.best_model = model
@@ -224,7 +224,7 @@ class ModelSelector:
                             'train_time': train_time
                         }
                         
-                        # En iyi modeli güncelle (accuracy'ye göre)
+                        # Update best model (based on accuracy)
                         if accuracy > self.best_score:
                             self.best_score = accuracy
                             self.best_model = model

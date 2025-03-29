@@ -1,30 +1,30 @@
-# Model Seçme Modülü 🚀
+# Model Selection Module 🚀
 
-Bu modül, makine öğrenmesi modellerini otomatik olarak değerlendiren ve en iyi performans gösteren modeli seçen bir araçtır. Regresyon, sınıflandırma ve kümeleme problemleri için çeşitli algoritmaları içerir. Ayrıca, veri ön işleme ve keşifsel veri analizi (EDA) için kapsamlı fonksiyonlar sunar.
+This module is a tool that automatically evaluates machine learning models and selects the best performing model. It includes various algorithms for regression, classification, and clustering problems. Additionally, it provides comprehensive functions for data preprocessing and exploratory data analysis (EDA).
 
-## Özellikler 🌟
+## Features 🌟
 
-### Model Seçici (ModelSelector)
+### Model Selector (ModelSelector)
 
-- **Çoklu Problem Tipi Desteği**: Regresyon, sınıflandırma ve kümeleme problemleri için kullanılabilir
-- **Geniş Model Yelpazesi**: 
-  - 14 regresyon algoritması
-  - 14 sınıflandırma algoritması
-  - 5 kümeleme algoritması
-- **Ensemble Modeller**: Bagging, stacking, boosting ve voting yöntemleri
-- **Otomatik Model Değerlendirme**: Tüm modelleri eğitir ve performanslarını karşılaştırır
-- **En İyi Model Seçimi**: Performans metriklerine göre en iyi modeli otomatik olarak seçer
+- **Multiple Problem Type Support**: Can be used for regression, classification, and clustering problems
+- **Wide Range of Models**: 
+  - 14 regression algorithms
+  - 14 classification algorithms
+  - 5 clustering algorithms
+- **Ensemble Models**: Bagging, stacking, boosting, and voting methods
+- **Automatic Model Evaluation**: Trains all models and compares their performance
+- **Best Model Selection**: Automatically selects the best model based on performance metrics
 
-### Veri Ön İşleme (DataPreprocessor) 🛠️
+### Data Preprocessing (DataPreprocessor) 🛠️
 
-- **Eksik Değer İşleme**: Ortalama, medyan, mod, sabit değer, KNN ve satır silme yöntemleri
-- **Aykırı Değer Tespiti ve İşleme**: Z-skor, IQR, izolasyon ormanı yöntemleri
-- **Özellik Ölçeklendirme**: Standart, MinMax, Robust ve Power dönüşümleri
-- **Kategorik Değişken Kodlama**: One-hot, Label ve Ordinal kodlama
-- **Özellik Seçimi**: K-en iyi, önem tabanlı, RFE ve PCA yöntemleri
-- **Keşifsel Veri Analizi (EDA)**: Görselleştirme araçları ve istatistiksel analizler
+- **Missing Value Handling**: Mean, median, mode, constant value, KNN, and row deletion methods
+- **Outlier Detection and Handling**: Z-score, IQR, isolation forest methods
+- **Feature Scaling**: Standard, MinMax, Robust, and Power transformations
+- **Categorical Variable Encoding**: One-hot, Label, and Ordinal encoding
+- **Feature Selection**: K-best, importance-based, RFE, and PCA methods
+- **Exploratory Data Analysis (EDA)**: Visualization tools and statistical analyses
 
-## Kurulum 🔧
+## Installation 🔧�
 
 ```bash
 pip install -r requirements.txt
@@ -62,9 +62,9 @@ print(f"En iyi model: {ms.best_model_name}")
 from model_selector import ModelSelector
 import numpy as np
 
-# Veri oluştur
+# Create data
 X = np.random.rand(100, 5)
-y = np.random.randint(0, 3, 100)  # 3 sınıflı sınıflandırma
+y = np.random.randint(0, 3, 100)  # 3-class classification
 
 # Model seçici oluştur
 ms = ModelSelector(problem_type='classification')
@@ -158,13 +158,13 @@ ms.fit(X, y)
 
 Daha kapsamlı bir örnek için `example_usage.py` dosyasına bakabilirsiniz. Bu dosya, veri ön işleme ve model seçme modüllerinin birlikte nasıl kullanılacağını gösterir.
 
-## Test Dosyaları 🧪
+## Test Files 🧪
 
-Proje, farklı problem tipleri için test dosyaları içerir:
+The project includes test files for different problem types:
 
-- **test_regression.py**: Regresyon modelleri için test dosyası (California Housing veri seti)
-- **test_classification.py**: Sınıflandırma modelleri için test dosyası (Iris veri seti)
-- **test_clustering.py**: Kümeleme modelleri için test dosyası (yapay veri seti)
+- **test_regression.py**: Test file for regression models (California Housing dataset)
+- **test_classification.py**: Test file for classification models (Iris dataset)
+- **test_clustering.py**: Test file for clustering models (synthetic dataset)
 
 Test dosyalarını çalıştırmak için:
 

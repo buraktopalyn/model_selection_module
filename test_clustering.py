@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Model Seçici Test Dosyası - Kümeleme
+Model Selector Test File - Clustering
 
-Bu dosya, model_selector.py dosyasındaki ModelSelector sınıfının kümeleme özelliğini
-test etmek için kullanılır. Scikit-learn'den make_blobs fonksiyonu kullanılarak yapay
-kümeleme veri seti oluşturulur ve en iyi kümeleme modeli bulunur.
+This file is used to test the clustering functionality of the ModelSelector class in
+model_selector.py. Using the make_blobs function from scikit-learn, it creates an artificial
+clustering dataset and finds the best clustering model.
 """
 
 import numpy as np
@@ -16,7 +16,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import silhouette_score
 from model_selector import ModelSelector
 
-# Yapay kümeleme veri seti oluştur
+# Create artificial clustering dataset
 print("\n=== Yapay Kümeleme Veri Seti Oluşturuluyor ===\n")
 n_samples = 500
 n_features = 2
@@ -29,16 +29,16 @@ X, y = make_blobs(n_samples=n_samples,
                  cluster_std=1.0,
                  random_state=random_state)
 
-# Veri seti hakkında bilgi ver
+# Display dataset information
 print(f"Veri seti boyutu: {X.shape}")
 print(f"Özellik sayısı: {n_features}")
 print(f"Gerçek küme sayısı: {n_clusters}")
 
-# Veriyi ölçeklendir
+# Scale the data
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
-# Veri setini görselleştir
+# Visualize the dataset
 plt.figure(figsize=(10, 8))
 plt.subplot(2, 2, 1)
 sns.scatterplot(x=X[:, 0], y=X[:, 1], hue=y, palette='viridis')
@@ -46,23 +46,23 @@ plt.title('Yapay Kümeleme Veri Seti - Gerçek Kümeler')
 plt.xlabel('Özellik 1')
 plt.ylabel('Özellik 2')
 
-# Kümeleme modellerini test et
+# Test clustering models
 print("\n=== Kümeleme Modelleri Testi Başlıyor ===\n")
 ms_clust = ModelSelector('clustering')
 
-# Modelleri eğit ve değerlendir
+# Train and evaluate models
 print("Modeller eğitiliyor ve değerlendiriliyor...")
 ms_clust.fit(X_scaled, None, test_size=0.3, random_state=42)
 
-# Sonuçları görüntüle
+# Display results
 print("\n=== Model Sonuçları ===\n")
 results = ms_clust.get_results()
 
-# Sonuçları tablo halinde göster
+# Show results in table format
 train_times = {}
 silhouette_scores = {}
 
-# Silhouette skorlarını hesapla
+# Calculate silhouette scores
 for name, result in results.items():
     if 'error' in result:
         print(f"{name}: HATA - {result['error']}")
@@ -71,17 +71,17 @@ for name, result in results.items():
     train_time = result['train_time']
     train_times[name] = train_time
     
-    # Model nesnesini al
+    # Get model object
     model = result['model']
     
-    # Modeli kullanarak kümeleme yap
+    # Perform clustering using the model
     try:
         if hasattr(model, 'predict'):
             labels = model.predict(X_scaled)
         else:
             labels = model.fit_predict(X_scaled)
         
-        # Silhouette skoru hesapla (en az 2 küme olmalı ve her kümede en az 1 örnek olmalı)
+        # Calculate silhouette score (at least 2 clusters and 1 sample per cluster required)
         n_labels = len(np.unique(labels))
         if n_labels > 1 and n_labels < len(X_scaled):
             score = silhouette_score(X_scaled, labels)
@@ -92,7 +92,7 @@ for name, result in results.items():
             print(f"  Bulunan Küme Sayısı: {n_labels}")
             print()
             
-            # Her model için kümeleme sonuçlarını görselleştir
+            # Visualize clustering results for each model
             plt.figure(figsize=(8, 6))
             plt.scatter(X_scaled[:, 0], X_scaled[:, 1], c=labels, cmap='viridis', alpha=0.7)
             plt.title(f'{name} Kümeleme Sonucu (Silhouette: {score:.4f})')
@@ -106,7 +106,7 @@ for name, result in results.items():
     except Exception as e:
         print(f"{name}: Silhouette skoru hesaplanamadı - {str(e)}")
 
-# En iyi modeli göster
+# Show the best model
 best_model_info = ms_clust.get_best_model()
 print("\n=== En İyi Model (Eğitim Süresine Göre) ===\n")
 print(f"Model: {best_model_info['model_name']}")
@@ -115,14 +115,14 @@ print("\nParametreler:")
 for param, value in best_model_info['parameters'].items():
     print(f"  {param}: {value}")
 
-# Silhouette skorlarına göre en iyi model
+# Best model according to silhouette scores
 if silhouette_scores:
     best_silhouette_model = max(silhouette_scores.items(), key=lambda x: x[1])
     print("\n=== En İyi Model (Silhouette Skoruna Göre) ===\n")
     print(f"Model: {best_silhouette_model[0]}")
     print(f"Silhouette Skoru: {best_silhouette_model[1]:.4f}")
 
-# Modellerin silhouette skorlarını görselleştir
+# Visualize silhouette scores of models
 plt.figure(figsize=(15, 10))
 plt.subplot(2, 2, 2)
 if silhouette_scores:
@@ -131,9 +131,9 @@ if silhouette_scores:
     plt.xticks(rotation=90)
     plt.title('Model Silhouette Skorları')
     plt.ylabel('Silhouette Skoru')
-    plt.ylim(0, 1.0)  # Silhouette skoru -1 ile 1 arasındadır, genelde pozitif değerler beklenir
+    plt.ylim(0, 1.0)  # Silhouette score is between -1 and 1, positive values are expected
 
-# Modellerin eğitim sürelerini görselleştir
+# Visualize training times of models
 plt.subplot(2, 2, 3)
 sorted_times = {k: v for k, v in sorted(train_times.items(), key=lambda item: item[1])}
 plt.bar(sorted_times.keys(), sorted_times.values(), color='salmon')
@@ -141,7 +141,7 @@ plt.xticks(rotation=90)
 plt.title('Model Eğitim Süreleri')
 plt.ylabel('Süre (saniye)')
 
-# En iyi modelin (silhouette skoruna göre) kümeleme sonucunu görselleştir
+# Visualize clustering result of the best model (based on silhouette score)
 if silhouette_scores:
     plt.subplot(2, 2, 4)
     best_model_name = best_silhouette_model[0]

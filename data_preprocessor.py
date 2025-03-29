@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 """
-Veri Ön İşleme Modülü
+Data Preprocessing Module
 
-Bu modül, veri ön işleme ve keşifsel veri analizi (EDA) için çeşitli fonksiyonlar içerir.
-Özellikler:
-- Eksik değer işleme
-- Aykırı değer tespiti ve işleme
-- Özellik ölçeklendirme
-- Kategorik değişken kodlama
-- Özellik seçimi
-- Keşifsel veri analizi (EDA) görselleştirmeleri
+This module contains various functions for data preprocessing and exploratory data analysis (EDA).
+Features:
+- Missing value handling
+- Outlier detection and handling
+- Feature scaling
+- Categorical variable encoding
+- Feature selection
+- Exploratory data analysis (EDA) visualizations
 """
 
 import numpy as np
@@ -28,30 +28,37 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import silhouette_score
 from sklearn.cluster import KMeans
+from schemas import PreprocessingConfig
 
 # Görselleştirme ayarları
 sns.set(style="whitegrid")
 warnings.filterwarnings('ignore')
 
 class DataPreprocessor:
-    def __init__(self, verbose: bool = True) -> None:
+    def __init__(self, verbose: bool = True, config: PreprocessingConfig | dict = None) -> None:
         """
-        Veri ön işleme sınıfını başlatır.
+        Initializes the data preprocessing class.
 
         Args:
-            verbose (bool, optional): İşlem detaylarını gösterme durumu. Varsayılan: True.
+            verbose (bool, optional): Whether to show process details. Default: True.
 
         Attributes:
-            transformers (dict): Ölçeklendiricileri saklamak için sözlük
-            encoders (dict): Kodlayıcıları saklamak için sözlük
-            imputers (dict): Eksik veri doldurucuları saklamak için sözlük
-            feature_selectors (dict): Özellik seçicileri saklamak için sözlük
-            outlier_indices (dict): Aykırı değer indekslerini saklamak için sözlük
-            dropped_columns (list): Düşürülen sütunların listesi
-            original_data (pd.DataFrame): Orijinal veri seti
-            processed_data (pd.DataFrame): İşlenmiş veri seti
+            transformers (dict): Dictionary to store scalers
+            encoders (dict): Dictionary to store encoders
+            imputers (dict): Dictionary to store missing value imputers
+            feature_selectors (dict): Dictionary to store feature selectors
+            outlier_indices (dict): Dictionary to store outlier indices
+            dropped_columns (list): List of dropped columns
+            original_data (pd.DataFrame): Original dataset
+            processed_data (pd.DataFrame): Processed dataset
         """
         self.verbose = verbose
+        if isinstance(config, dict):
+            config = PreprocessingConfig(**config)
+        elif config is None:
+            config = PreprocessingConfig()
+            
+        self.config = config
         self.transformers = {}
         self.encoders = {}
         self.imputers = {}
@@ -61,40 +68,34 @@ class DataPreprocessor:
         self.original_data = None
         self.processed_data = None
         
-    def fit_transform(self, data: pd.DataFrame, target: str | None = None, preprocessing_steps: dict | None = None) -> pd.DataFrame:
+    def fit_transform(self, data: pd.DataFrame, target: str | None = None) -> pd.DataFrame:
         """
-        Veriyi işler ve dönüştürür.
+        Processes and transforms the data.
 
         Args:
-            data (pd.DataFrame): İşlenecek ham veri seti
-            target (str | None, optional): Hedef değişken adı. Varsayılan: None.
-            preprocessing_steps (dict | None, optional): Uygulanacak ön işleme adımlarını içeren sözlük.
-                Format: {'adım_adi': {parametreler}}. Varsayılan: None.
+            data (pd.DataFrame): Raw dataset to be processed
+            target (str | None, optional): Target variable name. Default: None.
+            preprocessing_steps (dict | None, optional): Dictionary containing preprocessing steps to apply.
+                Format: {'step_name': {parameters}}. Default: None.
 
         Returns:
-            pd.DataFrame: İşlenmiş veri seti
+            pd.DataFrame: Processed dataset
 
         Raises:
-            ValueError: Geçersiz ön işleme adımı verildiğinde
+            ValueError: When an invalid preprocessing step is provided
         """
         self.original_data = data.copy()
         self.processed_data = data.copy()
         
-        # Varsayılan ön işleme adımları
-        default_steps = {
-            'drop_columns': {'columns': []},
-            'handle_missing_values': {'method': 'mean'},
-            'handle_outliers': {'method': 'none'},
-            'encode_categorical': {'method': 'one_hot', 'columns': []},
-            'scale_features': {'method': 'standard', 'columns': []},
-            'feature_selection': {'method': 'none', 'k': 10}
+        # Pydantic modelinden ön işleme adımlarını al
+        steps = {
+            'drop_columns': {'columns': self.config.drop_columns},
+            'handle_missing_values': self.config.handle_missing_values,
+            'handle_outliers': self.config.handle_outliers,
+            'encode_categorical': self.config.encode_categorical,
+            'scale_features': self.config.scale_features,
+            'feature_selection': self.config.feature_selection
         }
-        
-        # Kullanıcı tarafından belirtilen adımları varsayılan adımlarla birleştir
-        if preprocessing_steps is None:
-            preprocessing_steps = {}
-            
-        steps = {**default_steps, **preprocessing_steps}
         
         # Sütunları düşür
         if steps['drop_columns']['columns']:
@@ -129,12 +130,12 @@ class DataPreprocessor:
     
     def _drop_columns(self, columns):
         """
-        Belirtilen sütunları düşürür.
+        Drops specified columns.
         
         Parameters:
         -----------
         columns : list
-            Düşürülecek sütun isimleri
+            Names of columns to drop
         """
         if not columns:
             return
@@ -151,16 +152,16 @@ class DataPreprocessor:
     
     def _handle_missing_values(self, method='mean', columns=None, **kwargs):
         """
-        Eksik değerleri işler.
+        Handles missing values.
         
         Parameters:
         -----------
         method : str, default='mean'
-            Eksik değer doldurma yöntemi: 'mean', 'median', 'mode', 'constant', 'knn', 'drop'
+            Missing value imputation method: 'mean', 'median', 'mode', 'constant', 'knn', 'drop'
         columns : list, optional
-            İşlenecek sütunlar. None ise tüm sütunlar işlenir.
+            Columns to process. If None, all columns are processed.
         **kwargs : dict
-            Ek parametreler
+            Additional parameters
         """
         if columns is None:
             # Sayısal ve kategorik sütunları ayır
@@ -227,16 +228,16 @@ class DataPreprocessor:
     
     def _handle_outliers(self, method='none', columns=None, threshold=1.5):
         """
-        Aykırı değerleri işler.
+        Handles outliers.
         
         Parameters:
         -----------
         method : str, default='none'
-            Aykırı değer işleme yöntemi: 'none', 'remove', 'clip', 'winsorize', 'zscore'
+            Outlier handling method: 'none', 'remove', 'clip', 'winsorize', 'zscore'
         columns : list, optional
-            İşlenecek sütunlar. None ise tüm sayısal sütunlar işlenir.
+            Columns to process. If None, all numeric columns are processed.
         threshold : float, default=1.5
-            Aykırı değer eşiği (IQR yöntemi için)
+            Outlier threshold (for IQR method)
         """
         if method == 'none':
             return
@@ -298,16 +299,16 @@ class DataPreprocessor:
     
     def _encode_categorical(self, method='one_hot', columns=None, **kwargs):
         """
-        Kategorik değişkenleri kodlar.
+        Encodes categorical variables.
         
         Parameters:
         -----------
         method : str, default='one_hot'
-            Kodlama yöntemi: 'one_hot', 'label', 'ordinal'
+            Encoding method: 'one_hot', 'label', 'ordinal'
         columns : list, optional
-            İşlenecek sütunlar. None ise tüm kategorik sütunlar işlenir.
+            Columns to process. If None, all categorical columns are processed.
         **kwargs : dict
-            Ek parametreler
+            Additional parameters
         """
         if columns is None:
             # Tüm kategorik sütunları seç
@@ -372,14 +373,14 @@ class DataPreprocessor:
     
     def _scale_features(self, method='standard', columns=None):
         """
-        Sayısal özellikleri ölçeklendirir.
+        Scales numerical features.
         
         Parameters:
         -----------
         method : str, default='standard'
-            Ölçeklendirme yöntemi: 'standard', 'minmax', 'robust', 'power'
+            Scaling method: 'standard', 'minmax', 'robust', 'power'
         columns : list, optional
-            İşlenecek sütunlar. None ise tüm sayısal sütunlar işlenir.
+            Columns to process. If None, all numeric columns are processed.
         """
         if columns is None:
             # Tüm sayısal sütunları seç
@@ -419,18 +420,18 @@ class DataPreprocessor:
     
     def _feature_selection(self, target, method='none', k=10, **kwargs):
         """
-        Özellik seçimi yapar.
+        Performs feature selection.
         
         Parameters:
         -----------
         target : str
-            Hedef değişken adı
+            Target variable name
         method : str, default='none'
-            Özellik seçim yöntemi: 'none', 'kbest', 'rfe', 'pca', 'importance'
+            Feature selection method: 'none', 'kbest', 'rfe', 'pca', 'importance'
         k : int, default=10
-            Seçilecek özellik sayısı
+            Number of features to select
         **kwargs : dict
-            Ek parametreler
+            Additional parameters
         """
         if method == 'none':
             return
@@ -565,7 +566,7 @@ class DataPreprocessor:
     
     def plot_missing_values(self):
         """
-        Eksik değerleri görselleştirir.
+        Visualizes missing values.
         """
         if self.original_data is None:
             print("Önce veriyi yüklemelisiniz.")
@@ -594,14 +595,14 @@ class DataPreprocessor:
     
     def plot_outliers(self, columns=None, method='boxplot'):
         """
-        Aykırı değerleri görselleştirir.
+        Visualizes outliers.
         
         Parameters:
         -----------
         columns : list, optional
-            Görselleştirilecek sütunlar. None ise tüm sayısal sütunlar görselleştirilir.
+            Columns to visualize. If None, all numeric columns are visualized.
         method : str, default='boxplot'
-            Görselleştirme yöntemi: 'boxplot', 'histogram'
+            Visualization method: 'boxplot', 'histogram'
         """
         if self.original_data is None:
             print("Önce veriyi yüklemelisiniz.")

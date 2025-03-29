@@ -29,12 +29,12 @@ boston = load_boston()
 boston_data = pd.DataFrame(boston.data, columns=boston.feature_names)
 boston_data['PRICE'] = boston.target
 
-print("\nVeri seti boyutu:", boston_data.shape)
-print("\nİlk 5 satır:")
+print("\nDataset size:", boston_data.shape)
+print("\nFirst 5 rows:")
 print(boston_data.head())
 
 # Veri ön işleme
-print("\n1. Veri Ön İşleme Adımı")
+print("\n1. Data Preprocessing Step")
 preprocessor = DataPreprocessor(verbose=True)
 
 # Ön işleme adımlarını tanımla
@@ -52,8 +52,8 @@ processed_data = preprocessor.fit_transform(
     preprocessing_steps=preprocessing_steps
 )
 
-print("\nİşlenmiş veri seti boyutu:", processed_data.shape)
-print("\nİşlenmiş verinin ilk 5 satırı:")
+print("\nProcessed dataset size:", processed_data.shape)
+print("\nFirst 5 rows of processed data:")
 print(processed_data.head())
 
 # Hedef değişkeni ayır
@@ -61,7 +61,7 @@ X = processed_data.drop(columns=['PRICE'])
 y = processed_data['PRICE']
 
 # Model seçimi
-print("\n2. Model Seçimi Adımı")
+print("\n2. Model Selection Step")
 model_selector = ModelSelector(problem_type='regression')
 
 # Ensemble modeller ekle
@@ -74,13 +74,13 @@ model_selector.fit(X, y)
 # En iyi modeli al
 best_model_info = model_selector.get_best_model()
 
-print(f"\nEn iyi regresyon modeli: {best_model_info['model_name']}")
+print(f"\nBest regression model: {best_model_info['model_name']}")
 print(f"R2 skoru: {best_model_info['score']:.4f}")
 print(f"Model parametreleri: {best_model_info['parameters']}")
 
 # Tüm model sonuçlarını göster
 results = model_selector.get_results()
-print("\nTüm model sonuçları:")
+print("\nAll model results:")
 for model_name, result in results.items():
     if 'error' in result:
         print(f"{model_name}: Hata - {result['error']}")
@@ -98,11 +98,11 @@ iris_data = pd.DataFrame(iris.data, columns=iris.feature_names)
 iris_data['target'] = iris.target
 
 print("\nVeri seti boyutu:", iris_data.shape)
-print("\nİlk 5 satır:")
+print("\nFirst 5 rows:")
 print(iris_data.head())
 
 # Veri ön işleme
-print("\n1. Veri Ön İşleme Adımı")
+print("\n1. Data Preprocessing Step")
 preprocessor = DataPreprocessor(verbose=True)
 
 # Ön işleme adımlarını tanımla
@@ -118,8 +118,8 @@ processed_data = preprocessor.fit_transform(
     preprocessing_steps=preprocessing_steps
 )
 
-print("\nİşlenmiş veri seti boyutu:", processed_data.shape)
-print("\nİşlenmiş verinin ilk 5 satırı:")
+print("\nProcessed dataset size:", processed_data.shape)
+print("\nFirst 5 rows of processed data:")
 print(processed_data.head())
 
 # Hedef değişkeni ayır
@@ -127,7 +127,7 @@ X = processed_data.drop(columns=['target'])
 y = processed_data['target']
 
 # Model seçimi
-print("\n2. Model Seçimi Adımı")
+print("\n2. Model Selection Step")
 model_selector = ModelSelector(problem_type='classification')
 
 # Ensemble modeller ekle
@@ -154,11 +154,11 @@ X, _ = make_blobs(n_samples=300, centers=4, cluster_std=0.60, random_state=0)
 cluster_data = pd.DataFrame(X, columns=['feature1', 'feature2'])
 
 print("\nVeri seti boyutu:", cluster_data.shape)
-print("\nİlk 5 satır:")
+print("\nFirst 5 rows:")
 print(cluster_data.head())
 
 # Veri ön işleme
-print("\n1. Veri Ön İşleme Adımı")
+print("\n1. Data Preprocessing Step")
 preprocessor = DataPreprocessor(verbose=True)
 
 # Ön işleme adımlarını tanımla
@@ -172,12 +172,12 @@ processed_data = preprocessor.fit_transform(
     preprocessing_steps=preprocessing_steps
 )
 
-print("\nİşlenmiş veri seti boyutu:", processed_data.shape)
-print("\nİşlenmiş verinin ilk 5 satırı:")
+print("\nProcessed dataset size:", processed_data.shape)
+print("\nFirst 5 rows of processed data:")
 print(processed_data.head())
 
 # Model seçimi
-print("\n2. Model Seçimi Adımı")
+print("\n2. Model Selection Step")
 model_selector = ModelSelector(problem_type='clustering')
 
 # Modelleri eğit
@@ -221,4 +221,4 @@ print("\n4. Özellik önemleri:")
 # Özellik önemlerini görselleştirmek için bu satırı aktif edin:
 # eda_preprocessor.plot_feature_importance(target='PRICE')
 
-print("\nÖrnek kullanım tamamlandı.")
+print("\nExample usage completed.")
