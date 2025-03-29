@@ -1,44 +1,157 @@
-# 🚀 Farklı Senaryolar İçin Model Seçme Modülü
+# Model Seçme Modülü
 
-Bu modül, farklı veri setleri için en iyi makine öğrenmesi algoritmasını seçen profesyonel bir araçtır. Regresyon, sınıflandırma ve kümeleme problemleri için kullanılabilir.
+Bu modül, makine öğrenmesi modellerini otomatik olarak değerlendiren ve en iyi performans gösteren modeli seçen bir araçtır. Regresyon, sınıflandırma ve kümeleme problemleri için çeşitli algoritmaları içerir.
 
 ## Özellikler
 
-- **🔄 Çoklu Problem Tipi Desteği**: Regresyon, sınıflandırma ve kümeleme problemleri için kullanılabilir.
-- **🔧 Otomatik Veri Ön İşleme**: 
-  - Eksik verileri öğrenme yoluyla doldurma (KNN Imputer)
-  - Aykırı değerleri tespit edip silme
-  - Otomatik ölçeklendirme (Scaling)
-  - Kategorik ve sayısal özellikleri otomatik tespit etme
-- **⚖️ Dengesiz Veri Desteği**: Sınıflandırma problemleri için SMOTE uygulanabilir.
-- **📚 Geniş Algoritma Desteği**:
-  - **Regresyon**: Linear Regression, Ridge, Lasso, ElasticNet, KNN, Decision Tree, Random Forest, Gradient Boosting, SVR, MLP, XGBoost, LightGBM, CatBoost
-  - **Sınıflandırma**: Logistic Regression, KNN, Decision Tree, Random Forest, Gradient Boosting, SVC, Naive Bayes, MLP, XGBoost, LightGBM, CatBoost
-  - **Kümeleme**: KMeans, Agglomerative Clustering, DBSCAN
-- **🤝 Ensemble Yöntemleri**: Bagging, Voting ve Stacking yöntemleri desteklenir.
-- **🔍 Hiperparametre Optimizasyonu**: Optuna ile otomatik hiperparametre optimizasyonu.
-- **📊 Kapsamlı Değerlendirme**: Çeşitli metriklerle model performansı değerlendirilir.
-- **📈 Görselleştirme**: Özellik önemi ve model karşılaştırması için görselleştirme araçları.
-- **💾 Model Kaydetme ve Yükleme**: Eğitilmiş modelleri kaydetme ve yükleme.
+- **Çoklu Problem Tipi Desteği**: Regresyon, sınıflandırma ve kümeleme problemleri için kullanılabilir
+- **Geniş Model Yelpazesi**: 
+  - 14 regresyon algoritması
+  - 14 sınıflandırma algoritması
+  - 5 kümeleme algoritması
+- **Ensemble Modeller**: Bagging, stacking, boosting ve voting yöntemleri
+- **Otomatik Model Değerlendirme**: Tüm modelleri eğitir ve performanslarını karşılaştırır
+- **En İyi Model Seçimi**: Performans metriklerine göre en iyi modeli otomatik olarak seçer
+
+## Kurulum
+
+```bash
+pip install -r requirements.txt
+```
 
 ## Kullanım
 
-1. 📥 Projeyi klonlayın:
-   ```bash
-   git clone https://github.com/kullanici/model_selection_module.git
-   ```
+### Regresyon Örneği
 
-2. 📦 Gerekli paketleri yükleyin:
-   ```bash
-   pip install -r requirements.txt
-   ```
+```python
+from model_selector import ModelSelector
+import numpy as np
 
-3. 🏃‍♂️ Örnek kullanım:
-   ```python
-   from model_selection import ModelSelector
-   selector = ModelSelector(problem_type='classification')
-   selector.fit(X_train, y_train)
-   print(selector.best_model)
-   ```
+# Veri oluştur
+X = np.random.rand(100, 5)
+y = np.random.rand(100) * 10
 
-Bu adımlar, projeyi kurmanıza ve kullanmanıza yardımcı olacaktır. Herhangi bir sorunuz varsa, lütfen proje deposundaki sorunlar bölümüne bakın veya katkıda bulunun!
+# Model seçici oluştur
+ms = ModelSelector(problem_type='regression')
+
+# Modelleri eğit ve değerlendir
+ms.fit(X, y)
+
+# Sonuçları görüntüle
+ms.display_results()
+
+# En iyi modeli al
+best_model = ms.get_best_model()
+print(f"En iyi model: {ms.best_model_name}")
+```
+
+### Sınıflandırma Örneği
+
+```python
+from model_selector import ModelSelector
+import numpy as np
+
+# Veri oluştur
+X = np.random.rand(100, 5)
+y = np.random.randint(0, 3, 100)  # 3 sınıflı sınıflandırma
+
+# Model seçici oluştur
+ms = ModelSelector(problem_type='classification')
+
+# Modelleri eğit ve değerlendir
+ms.fit(X, y)
+
+# Sonuçları görüntüle
+ms.display_results()
+
+# En iyi modeli al
+best_model = ms.get_best_model()
+print(f"En iyi model: {ms.best_model_name}")
+```
+
+### Kümeleme Örneği
+
+```python
+from model_selector import ModelSelector
+import numpy as np
+
+# Veri oluştur
+X = np.random.rand(100, 5)
+
+# Model seçici oluştur
+ms = ModelSelector(problem_type='clustering')
+
+# Modelleri eğit ve değerlendir
+ms.fit(X, None)
+
+# Sonuçları görüntüle
+ms.display_results()
+```
+
+### Ensemble Model Ekleme
+
+```python
+from model_selector import ModelSelector
+import numpy as np
+from sklearn.linear_model import Ridge, Lasso
+from sklearn.ensemble import RandomForestRegressor
+
+# Veri oluştur
+X = np.random.rand(100, 5)
+y = np.random.rand(100) * 10
+
+# Model seçici oluştur
+ms = ModelSelector(problem_type='regression')
+
+# Özel ensemble model ekle
+base_models = [Ridge(), Lasso(), RandomForestRegressor()]
+ms.add_ensemble_model('stacking', base_models=base_models)
+
+# Modelleri eğit ve değerlendir
+ms.fit(X, y)
+```
+
+## Desteklenen Modeller
+
+### Regresyon Modelleri
+- Linear Regression
+- Ridge
+- Lasso
+- ElasticNet
+- Decision Tree
+- Random Forest
+- Gradient Boosting
+- SVR
+- KNN
+- AdaBoost
+- Bagging
+- XGBoost
+- LightGBM
+- CatBoost
+
+### Sınıflandırma Modelleri
+- Logistic Regression
+- Decision Tree
+- Random Forest
+- Gradient Boosting
+- SVC
+- KNN
+- Naive Bayes
+- LDA
+- QDA
+- AdaBoost
+- Bagging
+- XGBoost
+- LightGBM
+- CatBoost
+
+### Kümeleme Modelleri
+- KMeans
+- Agglomerative
+- DBSCAN
+- Spectral
+- Birch
+
+## Lisans
+
+Bu proje MIT lisansı altında lisanslanmıştır.
