@@ -1,8 +1,8 @@
-# Model Seçme Modülü
+# Model Seçme Modülü 🚀
 
 Bu modül, makine öğrenmesi modellerini otomatik olarak değerlendiren ve en iyi performans gösteren modeli seçen bir araçtır. Regresyon, sınıflandırma ve kümeleme problemleri için çeşitli algoritmaları içerir. Ayrıca, veri ön işleme ve keşifsel veri analizi (EDA) için kapsamlı fonksiyonlar sunar.
 
-## Özellikler
+## Özellikler 🌟
 
 ### Model Seçici (ModelSelector)
 
@@ -15,7 +15,7 @@ Bu modül, makine öğrenmesi modellerini otomatik olarak değerlendiren ve en i
 - **Otomatik Model Değerlendirme**: Tüm modelleri eğitir ve performanslarını karşılaştırır
 - **En İyi Model Seçimi**: Performans metriklerine göre en iyi modeli otomatik olarak seçer
 
-### Veri Ön İşleme (DataPreprocessor)
+### Veri Ön İşleme (DataPreprocessor) 🛠️
 
 - **Eksik Değer İşleme**: Ortalama, medyan, mod, sabit değer, KNN ve satır silme yöntemleri
 - **Aykırı Değer Tespiti ve İşleme**: Z-skor, IQR, izolasyon ormanı yöntemleri
@@ -24,13 +24,13 @@ Bu modül, makine öğrenmesi modellerini otomatik olarak değerlendiren ve en i
 - **Özellik Seçimi**: K-en iyi, önem tabanlı, RFE ve PCA yöntemleri
 - **Keşifsel Veri Analizi (EDA)**: Görselleştirme araçları ve istatistiksel analizler
 
-## Kurulum
+## Kurulum 🔧
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## Kullanım
+## Kullanım 📊
 
 ### Regresyon Örneği
 
@@ -158,7 +158,7 @@ ms.fit(X, y)
 
 Daha kapsamlı bir örnek için `example_usage.py` dosyasına bakabilirsiniz. Bu dosya, veri ön işleme ve model seçme modüllerinin birlikte nasıl kullanılacağını gösterir.
 
-## Test Dosyaları
+## Test Dosyaları 🧪
 
 Proje, farklı problem tipleri için test dosyaları içerir:
 
@@ -215,6 +215,6 @@ python test_clustering.py
 - Spectral
 - Birch
 
-## Lisans
+## Lisans 📜
 
 Bu proje MIT lisansı altında lisanslanmıştır.
