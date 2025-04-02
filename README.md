@@ -1,219 +1,98 @@
 # Model Selection Module 🚀
 
-This module is a tool that automatically evaluates machine learning models and selects the best performing model. It includes various algorithms for regression, classification, and clustering problems. Additionally, it provides comprehensive functions for data preprocessing and exploratory data analysis (EDA).
+Bu modül, makine öğrenmesi modellerini otomatik olarak değerlendiren ve en iyi performans gösteren modeli seçen bir araçtır. Regresyon, sınıflandırma ve kümeleme problemleri için çeşitli algoritmalar içerir. Ayrıca, veri ön işleme ve keşifsel veri analizi (EDA) için kapsamlı fonksiyonlar sağlar.
 
-## Features 🌟
+## Özellikler 🌟
 
-### Model Selector (ModelSelector)
+### Model Seçici (ModelSelector)
 
-- **Multiple Problem Type Support**: Can be used for regression, classification, and clustering problems
-- **Wide Range of Models**: 
-  - 14 regression algorithms
-  - 14 classification algorithms
-  - 5 clustering algorithms
-- **Ensemble Models**: Bagging, stacking, boosting, and voting methods
-- **Automatic Model Evaluation**: Trains all models and compares their performance
-- **Best Model Selection**: Automatically selects the best model based on performance metrics
+- **Çoklu Problem Tipi Desteği**: Regresyon, sınıflandırma ve kümeleme problemleri için kullanılabilir
+- **Geniş Model Yelpazesi**: 
+  - 14 regresyon algoritması
+  - 14 sınıflandırma algoritması
+  - 5 kümeleme algoritması
+- **Ensemble Modeller**: Bagging, stacking, boosting ve voting yöntemleri
+- **Otomatik Model Değerlendirme**: Tüm modelleri eğitir ve performanslarını karşılaştırır
+- **En İyi Model Seçimi**: Performans metriklerine göre otomatik olarak en iyi modeli seçer
 
-### Data Preprocessing (DataPreprocessor) 🛠️
+### Veri Ön İşleyici (DataPreprocessor)
 
-- **Missing Value Handling**: Mean, median, mode, constant value, KNN, and row deletion methods
-- **Outlier Detection and Handling**: Z-score, IQR, isolation forest methods
-- **Feature Scaling**: Standard, MinMax, Robust, and Power transformations
-- **Categorical Variable Encoding**: One-hot, Label, and Ordinal encoding
-- **Feature Selection**: K-best, importance-based, RFE, and PCA methods
-- **Exploratory Data Analysis (EDA)**: Visualization tools and statistical analyses
+- **Eksik Veri İşleme**: Çeşitli eksik veri doldurma yöntemleri
+- **Aykırı Değer Tespiti ve İşleme**: Aykırı değerlerin tespiti ve düzeltilmesi
+- **Özellik Ölçeklendirme**: Standartlaştırma, normalleştirme ve robust ölçeklendirme
+- **Kategorik Değişken Kodlama**: Label encoding, one-hot encoding ve ordinal encoding
+- **Özellik Seçimi**: Çeşitli özellik seçim yöntemleri
+- **EDA Görselleştirmeleri**: Veri dağılımlarını ve ilişkilerini gösteren görselleştirmeler
 
-## Installation 🔧�
+## Kurulum ⚙️
 
+1. Gereksinimleri yükleyin:
 ```bash
 pip install -r requirements.txt
 ```
 
-## Usage 📊
-
-### Regression Example
-
+2. Modülü projenize ekleyin:
 ```python
 from model_selector import ModelSelector
-import numpy as np
-
-# Create data
-X = np.random.rand(100, 5)
-y = np.random.rand(100) * 10
-
-# Create model selector
-ms = ModelSelector(problem_type='regression')
-
-# Fit models and evaluate
-ms.fit(X, y)
-
-# Display results
-ms.display_results()
-
-# Get best model
-best_model = ms.get_best_model()
-print(f"En iyi model: {ms.best_model_name}")
-```
-
-### Classification Example
-
-```python
-from model_selector import ModelSelector
-import numpy as np
-
-# Create data
-X = np.random.rand(100, 5)
-y = np.random.randint(0, 3, 100)  # 3-class classification
-
-# Create model selector
-ms = ModelSelector(problem_type='classification')
-
-# Fit models and evaluate
-ms.fit(X, y)
-
-# Display results
-ms.display_results()
-
-# Get best model
-best_model = ms.get_best_model()
-print(f"En iyi model: {ms.best_model_name}")
-```
-
-### Clustering Example
-
-```python
-from model_selector import ModelSelector
-import numpy as np
-
-# Create data
-X = np.random.rand(100, 5)
-
-# Create model selector
-ms = ModelSelector(problem_type='clustering')
-
-# Fit models and evaluate
-ms.fit(X, None)
-
-# Display results
-ms.display_results()
-```
-
-### Data Preprocessing Example
-
-```python
 from data_preprocessor import DataPreprocessor
-import pandas as pd
-
-# Create data
-data = pd.DataFrame({
-    'A': [1, 2, None, 4, 5],
-    'B': [10, 20, 30, None, 50],
-    'C': ['x', 'y', 'z', 'x', 'y']
-})
-
-# Define preprocessing steps
-preprocessing_steps = {
-    'handle_missing_values': {'method': 'mean'},
-    'encode_categorical': {'method': 'one_hot'},
-    'scale_features': {'method': 'standard'}
-}
-
-# Create data preprocessor
-preprocessor = DataPreprocessor(verbose=True)
-
-# Preprocess data
-processed_data = preprocessor.fit_transform(
-    data=data,
-    preprocessing_steps=preprocessing_steps
-)
-
-print(processed_data.head())
 ```
 
-### Ensemble Model Adding Example
+## Kullanım 📊
 
+### Temel Kullanım
 ```python
-from model_selector import ModelSelector
-import numpy as np
-from sklearn.linear_model import Ridge, Lasso
-from sklearn.ensemble import RandomForestRegressor
+# Model seçici oluştur
+model_selector = ModelSelector(problem_type='regression')
 
-# Create data
-X = np.random.rand(100, 5)
-y = np.random.rand(100) * 10
+# Veri ön işleyici oluştur
+preprocessor = DataPreprocessor()
 
-# Create model selector
-ms = ModelSelector(problem_type='regression')
+# Veriyi yükle ve ön işle
+X, y = preprocessor.load_and_preprocess('data.csv')
 
-# Add ensemble models
-base_models = [Ridge(), Lasso(), RandomForestRegressor()]
-ms.add_ensemble_model('stacking', base_models=base_models)
-
-# Fit models and evaluate
-ms.fit(X, y)
+# Modelleri eğit ve değerlendir
+best_model = model_selector.select_best_model(X, y)
 ```
 
-### Full Example Usage
+### Tam Örnek Kullanım
+Daha kapsamlı bir örnek için `example_usage.py` dosyasına bakabilirsiniz. Bu dosya, veri ön işleme ve model seçme modüllerinin birlikte nasıl kullanılacağını gösterir.
 
-For a more comprehensive example, you can check the `example_usage.py` file. This file demonstrates how to use data preprocessing and model selection modules together.
+## Test Dosyaları 🧪
 
-## Test Files 🧪
+Proje, farklı problem tipleri için test dosyaları içerir:
 
-The project includes test files for different problem types:
+- **test_regression.py**: Regresyon modelleri için test dosyası (California Housing veri seti)
+- **test_classification.py**: Sınıflandırma modelleri için test dosyası (Iris veri seti)
+- **test_clustering.py**: Kümeleme modelleri için test dosyası (sentetik veri seti)
 
-- **test_regression.py**: Test file for regression models (California Housing dataset)
-- **test_classification.py**: Test file for classification models (Iris dataset)
-- **test_clustering.py**: Test file for clustering models (synthetic dataset)
-
-For running the test files:
-
+Testleri çalıştırmak için:
 ```bash
 python test_regression.py
 python test_classification.py
 python test_clustering.py
 ```
 
-## Supported Models
+## Proje Yapısı 📂
+```
+model_selection_module/
+├── data_preprocessor.py    # Veri ön işleme modülü
+├── model_selector.py       # Model seçme modülü
+├── example_usage.py        # Örnek kullanım
+├── test_regression.py      # Regresyon testleri
+├── test_classification.py  # Sınıflandırma testleri
+├── test_clustering.py      # Kümeleme testleri
+├── requirements.txt         # Gereksinimler
+└── README.md               # Bu dosya
+```
 
-### Regression Models
-- Linear Regression
-- Ridge
-- Lasso
-- ElasticNet
-- Decision Tree
-- Random Forest
-- Gradient Boosting
-- SVR
-- KNN
-- AdaBoost
-- Bagging
-- XGBoost
-- LightGBM
-- CatBoost
+## Katkıda Bulunma 🤝
 
-### Classification Models
-- Logistic Regression
-- Decision Tree
-- Random Forest
-- Gradient Boosting
-- SVC
-- KNN
-- Naive Bayes
-- LDA
-- QDA
-- AdaBoost
-- Bagging
-- XGBoost
-- LightGBM
-- CatBoost
+Katkıda bulunmak isterseniz:
+1. Bu repo'yu fork edin
+2. Yeni bir branch oluşturun (`git checkout -b feature/awesome-feature`)
+3. Değişikliklerinizi commit edin (`git commit -m 'Add some awesome feature'`)
+4. Branch'inizi pushlayın (`git push origin feature/awesome-feature`)
+5. Bir Pull Request açın
 
-### Clustering Models
-- KMeans
-- Agglomerative
-- DBSCAN
-- Spectral
-- Birch
-
-## Licence 📜
-This project is licensed under the MIT License.
+## Lisans 📜
+Bu proje MIT lisansı altında lisanslanmıştır - detaylar için [LICENSE](LICENSE) dosyasına bakın.
