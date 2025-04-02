@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy import stats
 import warnings
+from typing import Union
 from sklearn.impute import SimpleImputer, KNNImputer
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler, PowerTransformer
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder, OrdinalEncoder
@@ -35,7 +36,7 @@ sns.set(style="whitegrid")
 warnings.filterwarnings('ignore')
 
 class DataPreprocessor:
-    def __init__(self, verbose: bool = True, config: PreprocessingConfig | dict = None) -> None:
+    def __init__(self, verbose: bool = True, config: Union[PreprocessingConfig, dict] = None) -> None:
         """
         Initializes the data preprocessing class.
 
@@ -68,7 +69,7 @@ class DataPreprocessor:
         self.original_data = None
         self.processed_data = None
         
-    def fit_transform(self, data: pd.DataFrame, target: str | None = None) -> pd.DataFrame:
+    def fit_transform(self, data: pd.DataFrame, target: Union[str, None] = None, preprocessing_steps: Union[dict, None] = None) -> pd.DataFrame:
         """
         Processes and transforms the data.
 
@@ -87,15 +88,22 @@ class DataPreprocessor:
         self.original_data = data.copy()
         self.processed_data = data.copy()
         
-        # Pydantic modelinden ön işleme adımlarını al
-        steps = {
-            'drop_columns': {'columns': self.config.drop_columns},
-            'handle_missing_values': self.config.handle_missing_values,
-            'handle_outliers': self.config.handle_outliers,
-            'encode_categorical': self.config.encode_categorical,
-            'scale_features': self.config.scale_features,
-            'feature_selection': self.config.feature_selection
-        }
+        # Eğer preprocessing_steps parametresi verilmişse, config yerine onu kullan
+        if preprocessing_steps is not None:
+            steps = preprocessing_steps
+            # Eksik adımları varsayılan değerlerle doldur
+            if 'drop_columns' not in steps:
+                steps['drop_columns'] = {'columns': []}
+        else:
+            # Pydantic modelinden ön işleme adımlarını al
+            steps = {
+                'drop_columns': {'columns': self.config.drop_columns},
+                'handle_missing_values': self.config.handle_missing_values,
+                'handle_outliers': self.config.handle_outliers,
+                'encode_categorical': self.config.encode_categorical,
+                'scale_features': self.config.scale_features,
+                'feature_selection': self.config.feature_selection
+            }
         
         # Sütunları düşür
         if steps['drop_columns']['columns']:

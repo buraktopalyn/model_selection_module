@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.datasets import load_boston, load_iris, make_blobs
+from sklearn.datasets import fetch_california_housing, load_iris, make_blobs
 
 # Kendi modüllerimizi import et
 from data_preprocessor import DataPreprocessor
@@ -24,20 +24,20 @@ print("\n" + "="*50)
 print("REGRESYON ÖRNEĞİ")
 print("="*50)
 
-# Boston ev fiyatları veri setini yükle
-boston = load_boston()
-boston_data = pd.DataFrame(boston.data, columns=boston.feature_names)
-boston_data['PRICE'] = boston.target
+# California ev fiyatları veri setini yükle
+housing = fetch_california_housing()
+california_data = pd.DataFrame(housing.data, columns=housing.feature_names)
+california_data['PRICE'] = housing.target
 
-print("\nDataset size:", boston_data.shape)
+print("\nDataset size:", california_data.shape)
 print("\nFirst 5 rows:")
-print(boston_data.head())
+print(california_data.head())
 
-# Veri ön işleme
+# Data preprocessing
 print("\n1. Data Preprocessing Step")
 preprocessor = DataPreprocessor(verbose=True)
 
-# Ön işleme adımlarını tanımla
+# Define preprocessing steps
 preprocessing_steps = {
     'handle_missing_values': {'method': 'mean'},
     'handle_outliers': {'method': 'clip', 'threshold': 1.5},
@@ -45,9 +45,9 @@ preprocessing_steps = {
     'feature_selection': {'method': 'importance', 'k': 8}
 }
 
-# Veriyi işle
+# Process data
 processed_data = preprocessor.fit_transform(
-    data=boston_data,
+    data=california_data,
     target='PRICE',
     preprocessing_steps=preprocessing_steps
 )
@@ -56,22 +56,22 @@ print("\nProcessed dataset size:", processed_data.shape)
 print("\nFirst 5 rows of processed data:")
 print(processed_data.head())
 
-# Hedef değişkeni ayır
+# Separate target variable
 X = processed_data.drop(columns=['PRICE'])
 y = processed_data['PRICE']
 
-# Model seçimi
+# Model selection
 print("\n2. Model Selection Step")
 model_selector = ModelSelector(problem_type='regression')
 
-# Ensemble modeller ekle
+# Add ensemble models
 model_selector.add_ensemble_model('stacking')
 model_selector.add_ensemble_model('voting')
 
-# Modelleri eğit
+# Train models
 model_selector.fit(X, y)
 
-# En iyi modeli al
+# Get the best model
 best_model_info = model_selector.get_best_model()
 
 print(f"\nBest regression model: {best_model_info['model_name']}")
@@ -101,17 +101,17 @@ print("\nVeri seti boyutu:", iris_data.shape)
 print("\nFirst 5 rows:")
 print(iris_data.head())
 
-# Veri ön işleme
+# Data preprocessing
 print("\n1. Data Preprocessing Step")
 preprocessor = DataPreprocessor(verbose=True)
 
-# Ön işleme adımlarını tanımla
+# Define preprocessing steps
 preprocessing_steps = {
     'scale_features': {'method': 'standard'},
     'feature_selection': {'method': 'kbest', 'k': 3}
 }
 
-# Veriyi işle
+# Process data
 processed_data = preprocessor.fit_transform(
     data=iris_data,
     target='target',
@@ -122,22 +122,22 @@ print("\nProcessed dataset size:", processed_data.shape)
 print("\nFirst 5 rows of processed data:")
 print(processed_data.head())
 
-# Hedef değişkeni ayır
+# Separate target variable
 X = processed_data.drop(columns=['target'])
 y = processed_data['target']
 
-# Model seçimi
+# Model selection
 print("\n2. Model Selection Step")
 model_selector = ModelSelector(problem_type='classification')
 
-# Ensemble modeller ekle
+# Add ensemble models
 model_selector.add_ensemble_model('stacking')
 model_selector.add_ensemble_model('voting')
 
-# Modelleri eğit
+# Train models
 model_selector.fit(X, y)
 
-# En iyi modeli al
+# Get the best model
 best_model_info = model_selector.get_best_model()
 
 print(f"\nEn iyi sınıflandırma modeli: {best_model_info['model_name']}")
@@ -157,16 +157,16 @@ print("\nVeri seti boyutu:", cluster_data.shape)
 print("\nFirst 5 rows:")
 print(cluster_data.head())
 
-# Veri ön işleme
+# Data preprocessing
 print("\n1. Data Preprocessing Step")
 preprocessor = DataPreprocessor(verbose=True)
 
-# Ön işleme adımlarını tanımla
+# Define preprocessing steps
 preprocessing_steps = {
     'scale_features': {'method': 'standard'}
 }
 
-# Veriyi işle
+# Process data
 processed_data = preprocessor.fit_transform(
     data=cluster_data,
     preprocessing_steps=preprocessing_steps
@@ -176,14 +176,14 @@ print("\nProcessed dataset size:", processed_data.shape)
 print("\nFirst 5 rows of processed data:")
 print(processed_data.head())
 
-# Model seçimi
+# Model selection
 print("\n2. Model Selection Step")
 model_selector = ModelSelector(problem_type='clustering')
 
-# Modelleri eğit
+# Train models
 model_selector.fit(processed_data, None)
 
-# En iyi modeli al
+# Get the best model
 best_model_info = model_selector.get_best_model()
 
 print(f"\nEn iyi kümeleme modeli: {best_model_info['model_name']}")
@@ -195,23 +195,23 @@ print("\n" + "="*50)
 print("EDA ÖRNEKLERİ")
 print("="*50)
 
-# Boston veri seti üzerinde EDA
-print("\nBoston veri seti üzerinde EDA örnekleri:")
+# California veri seti üzerinde EDA
+print("\nCalifornia veri seti üzerinde EDA örnekleri:")
 eda_preprocessor = DataPreprocessor(verbose=False)
 
 # Eksik değer analizi
 print("\n1. Eksik değer analizi:")
-print(boston_data.isnull().sum())
+print(california_data.isnull().sum())
 
 # Aykırı değer analizi
 print("\n2. Aykırı değer analizi:")
-eda_preprocessor.original_data = boston_data
+eda_preprocessor.original_data = california_data
 # Aykırı değerleri görselleştirmek için bu satırı aktif edin:
-# eda_preprocessor.plot_outliers(columns=['CRIM', 'RM', 'LSTAT', 'PRICE'])
+# eda_preprocessor.plot_outliers(columns=['MedInc', 'HouseAge', 'AveRooms', 'PRICE'])
 
 # Korelasyon matrisi
 print("\n3. Korelasyon matrisi:")
-corr = boston_data.corr()
+corr = california_data.corr()
 print(corr['PRICE'].sort_values(ascending=False))
 # Korelasyon matrisini görselleştirmek için bu satırı aktif edin:
 # eda_preprocessor.plot_correlation_matrix()
