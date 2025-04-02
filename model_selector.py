@@ -55,7 +55,7 @@ class ModelSelector:
             models (dict): Eğitilecek modellerin sözlüğü
             results (dict): Model sonuçlarını saklamak için sözlük
             best_model (Any): En iyi performans gösteren model
-            best_model_name (str | None): En iyi modelin adı
+            best_model_name (Union[str, None]): En iyi modelin adı
             best_params (dict | None): En iyi model parametreleri
             best_score (float): En iyi skor değeri
 
@@ -85,10 +85,10 @@ class ModelSelector:
                 'ElasticNet': ElasticNet(),
                 'Decision Tree': DecisionTreeRegressor(),
                 'Random Forest': RandomForestRegressor(n_jobs=-1),
-                'Gradient Boosting': GradientBoostingRegressor(n_jobs=-1),
+                'Gradient Boosting': GradientBoostingRegressor(),
                 'SVR': SVR(),
                 'KNN': KNeighborsRegressor(n_jobs=-1),
-                'AdaBoost': AdaBoostRegressor(n_jobs=-1),
+                'AdaBoost': AdaBoostRegressor(),
                 'Bagging': BaggingRegressor(n_jobs=-1),
                 'XGBoost': xgb.XGBRegressor(n_jobs=-1),
                 'LightGBM': lgbm.LGBMRegressor(n_jobs=-1),
@@ -100,13 +100,13 @@ class ModelSelector:
                 'Logistic Regression': LogisticRegression(max_iter=1000, n_jobs=-1),
                 'Decision Tree': DecisionTreeClassifier(),
                 'Random Forest': RandomForestClassifier(n_jobs=-1),
-                'Gradient Boosting': GradientBoostingClassifier(n_jobs=-1),
+                'Gradient Boosting': GradientBoostingClassifier(),
                 'SVC': SVC(probability=True),
                 'KNN': KNeighborsClassifier(n_jobs=-1),
                 'Naive Bayes': GaussianNB(),
                 'LDA': LinearDiscriminantAnalysis(),
                 'QDA': QuadraticDiscriminantAnalysis(),
-                'AdaBoost': AdaBoostClassifier(n_jobs=-1),
+                'AdaBoost': AdaBoostClassifier(),
                 'Bagging': BaggingClassifier(n_jobs=-1),
                 'XGBoost': xgb.XGBClassifier(n_jobs=-1),
                 'LightGBM': lgbm.LGBMClassifier(n_jobs=-1),
@@ -122,7 +122,9 @@ class ModelSelector:
                 'Birch': Birch()
             }
     
-    def add_ensemble_model(self, ensemble_type: str, base_models: list | None = None, weights: list[float] | None = None) -> None:
+    from typing import Union, List
+
+    def add_ensemble_model(self, ensemble_type: str, base_models: Union[list, None] = None, weights: Union[List[float], None] = None) -> None:
         """
         Ensemble model ekler ve modeller sözlüğüne kaydeder.
 
@@ -165,7 +167,7 @@ class ModelSelector:
                 )
             # Bagging and Boosting are already loaded
     
-    def fit(self, X: pd.DataFrame, y: pd.Series | None) -> None:
+    def fit(self, X: pd.DataFrame, y: Union[pd.Series, None], test_size=0.2, random_state=42) -> None:
         """
         Tüm modelleri eğitir ve performanslarını değerlendirir.
 
@@ -180,9 +182,9 @@ class ModelSelector:
         """
         # y is not used for clustering
         if self.problem_type != 'clustering':
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=self.test_size, random_state=self.random_state)
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
         else:
-            X_train, X_test = train_test_split(X, test_size=self.test_size, random_state=self.random_state)
+            X_train, X_test = train_test_split(X, test_size=test_size, random_state=random_state)
             y_train = y_test = None
         
         for name, model in self.models.items():
