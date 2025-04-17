@@ -12,6 +12,8 @@ Bu modül, en popüler makine öğrenmesi algoritmalarını içerir ve en iyi mo
 import numpy as np
 import pandas as pd
 import time
+import matplotlib.pyplot as plt
+import shap
 from sklearn.metrics import r2_score, mean_squared_error, accuracy_score, classification_report
 from sklearn.model_selection import train_test_split
 
@@ -317,3 +319,112 @@ class ModelSelector:
                 return self.best_model.predict(X)
             else:
                 return self.best_model.fit_predict(X)
+                
+    def explain_model(self, X, model_name=None, max_display=20, plot_type='bar', save_plot=False, filename=None):
+        """
+        SHAP (SHapley Additive exPlanations) değerlerini kullanarak model tahminlerini açıklar.
+        
+        Parameters:
+        -----------
+        X : pd.DataFrame
+            Açıklanacak veri seti (özellikler)
+        model_name : str, optional
+            Açıklanacak modelin adı. Belirtilmezse en iyi model kullanılır.
+        max_display : int, optional
+            Gösterilecek maksimum özellik sayısı. Varsayılan: 20.
+        plot_type : str, optional
+            Görselleştirme tipi ('bar', 'beeswarm', 'waterfall', 'force'). Varsayılan: 'bar'.
+        save_plot : bool, optional
+            Grafiği kaydetmek için True, ekranda göstermek için False. Varsayılan: False.
+        filename : str, optional
+            Kaydedilecek dosya adı. Belirtilmezse "shap_values_{model_name}.png" kullanılır.
+            
+        Returns:
+        --------
+        tuple
+            (shap_values, explainer) - SHAP değerleri ve açıklayıcı nesnesi
+            
+        Raises:
+        -------
+        ValueError
+            Geçersiz model adı veya desteklenmeyen model tipi durumunda
+        """
+        if self.problem_type == 'clustering':
+            raise ValueError("SHAP açıklamaları kümeleme modelleri için desteklenmemektedir.")
+            
+        # Hangi modeli kullanacağımızı belirle
+        if model_name is None:
+            if self.best_model is None:
+                raise ValueError("Önce modeli eğitmelisiniz.")
+            model = self.best_model
+            model_name = self.best_model_name
+        else:
+            if model_name not in self.models:
+                raise ValueError(f"'{model_name}' adlı model bulunamadı.")
+            model = self.models[model_name]
+            
+        # TreeExplainer için uygun modeller
+        tree_models = ['Random Forest', 'Decision Tree', 'Gradient Boosting', 'XGBoost', 'LightGBM', 'CatBoost', 'AdaBoost']
+        
+        try:
+            # Model tipine göre uygun explainer'ı seç
+            if any(tree_name in model_name for tree_name in tree_models):
+                explainer = shap.TreeExplainer(model)
+            else:
+                # Diğer modeller için KernelExplainer kullan
+                # Örnek veri seti oluştur (hesaplama süresini azaltmak için)
+                if len(X) > 100:
+                    background = shap.sample(X, 100)
+                else:
+                    background = X
+                    
+                # Tahmin fonksiyonunu belirle
+                if self.problem_type == 'regression':
+                    predict_fn = model.predict
+                else:  # classification
+                    # Olasılık değerlerini döndüren bir fonksiyon kullan
+                    if hasattr(model, 'predict_proba'):
+                        predict_fn = model.predict_proba
+                    else:
+                        predict_fn = model.predict
+                        
+                explainer = shap.KernelExplainer(predict_fn, background)
+            
+            # SHAP değerlerini hesapla
+            shap_values = explainer.shap_values(X)
+            
+            # Görselleştirme
+            plt.figure(figsize=(10, 8))
+            if plot_type == 'bar':
+                shap.summary_plot(shap_values, X, plot_type='bar', max_display=max_display, show=False)
+            elif plot_type == 'beeswarm':
+                shap.summary_plot(shap_values, X, max_display=max_display, show=False)
+            elif plot_type == 'waterfall':
+                # Waterfall plot için tek bir örnek gerekiyor
+                if isinstance(shap_values, list):  # Sınıflandırma durumunda
+                    shap.waterfall_plot(explainer.expected_value[0], shap_values[0][0], X.iloc[0], max_display=max_display, show=False)
+                else:  # Regresyon durumunda
+                    shap.waterfall_plot(explainer.expected_value, shap_values[0], X.iloc[0], max_display=max_display, show=False)
+            elif plot_type == 'force':
+                # Force plot için tek bir örnek gerekiyor
+                if isinstance(shap_values, list):  # Sınıflandırma durumunda
+                    shap.force_plot(explainer.expected_value[0], shap_values[0][0], X.iloc[0], matplotlib=True, show=False)
+                else:  # Regresyon durumunda
+                    shap.force_plot(explainer.expected_value, shap_values[0], X.iloc[0], matplotlib=True, show=False)
+            
+            plt.title(f"{model_name} için SHAP Değerleri")
+            plt.tight_layout()
+            
+            if save_plot:
+                if filename is None:
+                    filename = f"shap_values_{model_name.replace(' ', '_').lower()}.png"
+                plt.savefig(filename, dpi=300, bbox_inches='tight')
+                print(f"Grafik '{filename}' olarak kaydedildi.")
+            else:
+                plt.show()
+                
+            return shap_values, explainer
+            
+        except Exception as e:
+            print(f"SHAP hesaplaması sırasında hata oluştu: {str(e)}")
+            raise
