@@ -87,6 +87,52 @@ for model_name, result in results.items():
     else:
         print(f"{model_name}: R2={result['r2']:.4f}, RMSE={result['rmse']:.4f}, Eğitim süresi={result['train_time']:.4f}s")
 
+# Model açıklanabilirliği (SHAP değerleri)
+print("\n3. Model Açıklanabilirliği (SHAP)")
+print("\nEn iyi model için SHAP değerleri:")
+# En iyi model için SHAP değerlerini hesapla ve görselleştir
+shap_values, explainer = model_selector.explain_model(
+    X=X.iloc[:100],  # Hesaplama süresini azaltmak için ilk 100 örnek
+    plot_type='bar',  # Bar plot (özellik önem sıralaması)
+    max_display=10    # En önemli 10 özelliği göster
+)
+
+# Farklı görselleştirme tipleri için örnekler
+print("\nFarklı görselleştirme tipleri:")
+# Beeswarm plot (özellik dağılımları)
+model_selector.explain_model(
+    X=X.iloc[:100],
+    plot_type='beeswarm',
+    max_display=10
+)
+
+# Waterfall plot (tek bir örnek için tahmin açıklaması)
+model_selector.explain_model(
+    X=X.iloc[:1],  # Sadece ilk örnek
+    plot_type='waterfall',
+    max_display=10
+)
+
+# Belirli bir model için SHAP değerleri (örneğin: Random Forest)
+if 'Random Forest' in model_selector.models:
+    print("\nRandom Forest modeli için SHAP değerleri:")
+    model_selector.explain_model(
+        X=X.iloc[:50],
+        model_name='Random Forest',
+        plot_type='bar',
+        max_display=8
+    )
+
+# SHAP değerlerini dosyaya kaydetme örneği
+print("\nSHAP grafiğini dosyaya kaydetme:")
+model_selector.explain_model(
+    X=X.iloc[:100],
+    plot_type='bar',
+    max_display=10,
+    save_plot=True,
+    filename='shap_values_regression.png'
+)
+
 # 2. Sınıflandırma Örneği
 print("\n" + "="*50)
 print("SINIFLANDIRMA ÖRNEĞİ")
@@ -144,6 +190,52 @@ print(f"\nEn iyi sınıflandırma modeli: {best_model_info['model_name']}")
 print(f"Doğruluk: {best_model_info['score']:.4f}")
 print(f"Model parametreleri: {best_model_info['parameters']}")
 
+# Model açıklanabilirliği (SHAP değerleri)
+print("\n3. Model Açıklanabilirliği (SHAP)")
+print("\nEn iyi sınıflandırma modeli için SHAP değerleri:")
+# En iyi model için SHAP değerlerini hesapla ve görselleştir
+shap_values, explainer = model_selector.explain_model(
+    X=X,  # Sınıflandırma veri seti
+    plot_type='bar',  # Bar plot (özellik önem sıralaması)
+    max_display=4     # Tüm özellikleri göster (iris veri seti için 4 özellik var)
+)
+
+# Farklı görselleştirme tipleri için örnekler
+print("\nFarklı görselleştirme tipleri (sınıflandırma):")
+# Beeswarm plot (özellik dağılımları)
+model_selector.explain_model(
+    X=X,
+    plot_type='beeswarm',
+    max_display=4
+)
+
+# Force plot (tek bir örnek için tahmin açıklaması)
+model_selector.explain_model(
+    X=X.iloc[:1],  # Sadece ilk örnek
+    plot_type='force',
+    max_display=4
+)
+
+# Belirli bir model için SHAP değerleri (örneğin: Random Forest)
+if 'Random Forest' in model_selector.models:
+    print("\nRandom Forest sınıflandırıcısı için SHAP değerleri:")
+    model_selector.explain_model(
+        X=X,
+        model_name='Random Forest',
+        plot_type='bar',
+        max_display=4
+    )
+
+# SHAP değerlerini dosyaya kaydetme örneği
+print("\nSHAP grafiğini dosyaya kaydetme:")
+model_selector.explain_model(
+    X=X,
+    plot_type='bar',
+    max_display=4,
+    save_plot=True,
+    filename='shap_values_classification.png'
+)
+
 # 3. Kümeleme Örneği
 print("\n" + "="*50)
 print("KÜMELEME ÖRNEĞİ")
@@ -189,6 +281,12 @@ best_model_info = model_selector.get_best_model()
 print(f"\nEn iyi kümeleme modeli: {best_model_info['model_name']}")
 print(f"Eğitim süresi: {best_model_info['score']:.4f} saniye")
 print(f"Model parametreleri: {best_model_info['parameters']}")
+
+# Model açıklanabilirliği (SHAP değerleri)
+print("\n3. Model Açıklanabilirliği (SHAP)")
+print("\nNot: SHAP açıklamaları kümeleme modelleri için desteklenmemektedir.")
+print("Kümeleme modelleri için model açıklanabilirliği, kümeleme sonuçlarının görselleştirilmesi")
+print("veya küme merkezlerinin incelenmesi gibi farklı yöntemlerle sağlanabilir.")
 
 # 4. EDA Örnekleri
 print("\n" + "="*50)
