@@ -189,6 +189,9 @@ class ModelSelector:
             X_train, X_test = train_test_split(X, test_size=test_size, random_state=random_state)
             y_train = y_test = None
         
+        # Başarılı model sayacı
+        successful_models = 0
+        
         for name, model in self.models.items():
             start_time = time.time()
             
@@ -215,6 +218,8 @@ class ModelSelector:
                             self.best_model = model
                             self.best_model_name = name
                             self.best_params = model.get_params()
+                        
+                        successful_models += 1
                     
                     elif self.problem_type == 'classification':
                         y_pred = model.predict(X_test)
@@ -234,6 +239,8 @@ class ModelSelector:
                             self.best_model = model
                             self.best_model_name = name
                             self.best_params = model.get_params()
+                        
+                        successful_models += 1
                 
                 else:  # Kümeleme
                     # Bazı kümeleme algoritmaları fit_predict kullanır
@@ -258,11 +265,43 @@ class ModelSelector:
                         self.best_model = model
                         self.best_model_name = name
                         self.best_params = model.get_params()
+                    
+                    successful_models += 1
             
             except Exception as e:
                 self.results[name] = {
                     'error': str(e)
                 }
+                print(f"Error training {name}: {str(e)}")
+        
+        # Eğer hiçbir model başarıyla eğitilmediyse, en azından bir modeli kaydet
+        if successful_models == 0 and len(self.models) > 0:
+            # İlk modeli al
+            name = list(self.models.keys())[0]
+            model = self.models[name]
+            
+            try:
+                # Basit bir model oluştur (örneğin, sınıflandırma için DummyClassifier)
+                if self.problem_type == 'classification':
+                    from sklearn.dummy import DummyClassifier
+                    model = DummyClassifier(strategy='most_frequent')
+                    model.fit(X_train, y_train)
+                    
+                    # Sonuçları kaydet
+                    self.best_model = model
+                    self.best_model_name = "Fallback Dummy Classifier"
+                    self.best_params = model.get_params()
+                    self.best_score = 0.0  # Düşük bir skor
+                    
+                    self.results["Fallback Dummy Classifier"] = {
+                        'model': model,
+                        'accuracy': 0.0,
+                        'train_time': 0.1
+                    }
+                    
+                    print("Fallback model created due to training errors.")
+            except Exception as e:
+                print(f"Failed to create fallback model: {str(e)}")
         
         print("Eğitim işlemi bitti.")
         return self
@@ -320,16 +359,14 @@ class ModelSelector:
             else:
                 return self.best_model.fit_predict(X)
                 
-    def explain_model(self, X, model_name=None, max_display=20, plot_type='bar', save_plot=False, filename=None):
+    def explain_model(self, X, max_display=20, plot_type='bar', save_plot=False, filename=None):
         """
-        SHAP (SHapley Additive exPlanations) değerlerini kullanarak model tahminlerini açıklar.
+        SHAP (SHapley Additive exPlanations) değerlerini kullanarak en iyi model tahminlerini açıklar.
         
         Parameters:
         -----------
         X : pd.DataFrame
             Açıklanacak veri seti (özellikler)
-        model_name : str, optional
-            Açıklanacak modelin adı. Belirtilmezse en iyi model kullanılır.
         max_display : int, optional
             Gösterilecek maksimum özellik sayısı. Varsayılan: 20.
         plot_type : str, optional
@@ -347,21 +384,28 @@ class ModelSelector:
         Raises:
         -------
         ValueError
-            Geçersiz model adı veya desteklenmeyen model tipi durumunda
+            Desteklenmeyen model tipi durumunda
         """
         if self.problem_type == 'clustering':
-            raise ValueError("SHAP açıklamaları kümeleme modelleri için desteklenmemektedir.")
+            raise ValueError("SHAP explanations are not supported for clustering models.")
             
-        # Hangi modeli kullanacağımızı belirle
-        if model_name is None:
-            if self.best_model is None:
-                raise ValueError("Önce modeli eğitmelisiniz.")
+        # Sadece en iyi modeli kullan
+        if self.best_model is None:
+            # Eğer hiçbir model başarıyla eğitilmediyse, sonuçlardaki ilk modeli kullan
+            if not self.results:
+                raise ValueError("You must train the model first.")
+            
+            # Sonuçlardaki ilk başarılı modeli bul
+            for name, result in self.results.items():
+                if 'error' not in result and 'model' in result:
+                    model = result['model']
+                    model_name = name
+                    break
+            else:
+                raise ValueError("No successfully trained model found.")
+        else:
             model = self.best_model
             model_name = self.best_model_name
-        else:
-            if model_name not in self.models:
-                raise ValueError(f"'{model_name}' adlı model bulunamadı.")
-            model = self.models[model_name]
             
         # TreeExplainer için uygun modeller
         tree_models = ['Random Forest', 'Decision Tree', 'Gradient Boosting', 'XGBoost', 'LightGBM', 'CatBoost', 'AdaBoost']
@@ -401,16 +445,55 @@ class ModelSelector:
                 shap.summary_plot(shap_values, X, max_display=max_display, show=False)
             elif plot_type == 'waterfall':
                 # Waterfall plot için tek bir örnek gerekiyor
-                if isinstance(shap_values, list):  # Sınıflandırma durumunda
-                    shap.waterfall_plot(explainer.expected_value[0], shap_values[0][0], X.iloc[0], max_display=max_display, show=False)
-                else:  # Regresyon durumunda
-                    shap.waterfall_plot(explainer.expected_value, shap_values[0], X.iloc[0], max_display=max_display, show=False)
+                # Güncel SHAP sürümlerinde waterfall_plot için Explanation nesnesi gerekiyor
+                try:
+                    if isinstance(shap_values, list):  # Sınıflandırma durumunda
+                        base_value = explainer.expected_value[0] if isinstance(explainer.expected_value, list) else explainer.expected_value
+                        shap_explanation = shap.Explanation(values=shap_values[0][0], 
+                                                         base_values=float(base_value),  # Tek bir skaler değer kullan
+                                                         data=X.iloc[0].values,
+                                                         feature_names=X.columns.tolist())
+                    else:  # Regresyon durumunda
+                        base_value = explainer.expected_value
+                        shap_explanation = shap.Explanation(values=shap_values[0], 
+                                                         base_values=float(base_value),  # Tek bir skaler değer kullan
+                                                         data=X.iloc[0].values,
+                                                         feature_names=X.columns.tolist())
+                    
+                    # max_display parametresini kullanarak waterfall plot oluştur
+                    shap.plots.waterfall(shap_explanation, max_display=max_display)
+                except Exception as e:
+                    print(f"Waterfall plot oluşturulurken hata: {str(e)}")
+                    # Alternatif olarak summary plot göster
+                    if isinstance(shap_values, list):
+                        shap.summary_plot(shap_values[0], X, plot_type='bar', max_display=max_display, show=False)
+                    else:
+                        shap.summary_plot(shap_values, X, plot_type='bar', max_display=max_display, show=False)
             elif plot_type == 'force':
                 # Force plot için tek bir örnek gerekiyor
-                if isinstance(shap_values, list):  # Sınıflandırma durumunda
-                    shap.force_plot(explainer.expected_value[0], shap_values[0][0], X.iloc[0], matplotlib=True, show=False)
-                else:  # Regresyon durumunda
-                    shap.force_plot(explainer.expected_value, shap_values[0], X.iloc[0], matplotlib=True, show=False)
+                try:
+                    if len(X) > 1:
+                        print("Force plot için ilk örnek kullanılıyor.")
+                        X_single = X.iloc[0:1]
+                        shap_values_single = explainer.shap_values(X_single)
+                    else:
+                        X_single = X
+                        shap_values_single = shap_values
+                    
+                    # Sınıflandırma ve regresyon durumlarını ele al
+                    if isinstance(shap_values_single, list):  # Sınıflandırma durumunda
+                        expected_value = explainer.expected_value[0] if isinstance(explainer.expected_value, list) else explainer.expected_value
+                        shap.force_plot(expected_value, shap_values_single[0][0], X_single.iloc[0], show=False)
+                    else:  # Regresyon durumunda
+                        shap.force_plot(explainer.expected_value, shap_values_single[0], X_single.iloc[0], show=False)
+                except Exception as e:
+                    print(f"Force plot oluşturulurken hata: {str(e)}")
+                    print("Alternatif olarak bar plot kullanılıyor...")
+                    # Bar plot ile devam et
+                    if isinstance(shap_values, list):
+                        shap.summary_plot(shap_values[0], X, plot_type='bar', max_display=max_display, show=False)
+                    else:
+                        shap.summary_plot(shap_values, X, plot_type='bar', max_display=max_display, show=False)
             
             plt.title(f"{model_name} için SHAP Değerleri")
             plt.tight_layout()

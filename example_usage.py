@@ -98,7 +98,7 @@ shap_values, explainer = model_selector.explain_model(
 )
 
 # Farklı görselleştirme tipleri için örnekler
-print("\nFarklı görselleştirme tipleri:")
+print("\nFarklı görselleştirme tipleri (en iyi model için):")
 # Beeswarm plot (özellik dağılımları)
 model_selector.explain_model(
     X=X.iloc[:100],
@@ -112,16 +112,6 @@ model_selector.explain_model(
     plot_type='waterfall',
     max_display=10
 )
-
-# Belirli bir model için SHAP değerleri (örneğin: Random Forest)
-if 'Random Forest' in model_selector.models:
-    print("\nRandom Forest modeli için SHAP değerleri:")
-    model_selector.explain_model(
-        X=X.iloc[:50],
-        model_name='Random Forest',
-        plot_type='bar',
-        max_display=8
-    )
 
 # SHAP değerlerini dosyaya kaydetme örneği
 print("\nSHAP grafiğini dosyaya kaydetme:")
@@ -201,7 +191,7 @@ shap_values, explainer = model_selector.explain_model(
 )
 
 # Farklı görselleştirme tipleri için örnekler
-print("\nFarklı görselleştirme tipleri (sınıflandırma):")
+print("\nFarklı görselleştirme tipleri (en iyi sınıflandırma modeli için):")
 # Beeswarm plot (özellik dağılımları)
 model_selector.explain_model(
     X=X,
@@ -215,16 +205,6 @@ model_selector.explain_model(
     plot_type='force',
     max_display=4
 )
-
-# Belirli bir model için SHAP değerleri (örneğin: Random Forest)
-if 'Random Forest' in model_selector.models:
-    print("\nRandom Forest sınıflandırıcısı için SHAP değerleri:")
-    model_selector.explain_model(
-        X=X,
-        model_name='Random Forest',
-        plot_type='bar',
-        max_display=4
-    )
 
 # SHAP değerlerini dosyaya kaydetme örneği
 print("\nSHAP grafiğini dosyaya kaydetme:")
