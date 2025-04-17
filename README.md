@@ -14,6 +14,7 @@ Bu modül, makine öğrenmesi modellerini otomatik olarak değerlendiren ve en i
 - **Ensemble Modeller**: Bagging, stacking, boosting ve voting yöntemleri
 - **Otomatik Model Değerlendirme**: Tüm modelleri eğitir ve performanslarını karşılaştırır
 - **En İyi Model Seçimi**: Performans metriklerine göre otomatik olarak en iyi modeli seçer
+- **Model Açıklanabilirliği**: SHAP değerleri ile model tahminlerini ve özellik önem derecelerini açıklar
 
 ### Veri Ön İşleyici (DataPreprocessor)
 
